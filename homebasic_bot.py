@@ -69,6 +69,7 @@ now = datetime.datetime.now()
 api_key = 'fdf809985bf356bb6bd3a5c0e519e3bf'
 NEWS_API_ENDPOINT = 'https://newsapi.org/v2/top-headlines'
 NEWS_API_KEY = '22a344f591994786a0fd76f338785f11'
+API_TOKEN = ''
 
 
 @bot.message_handler(func=lambda message: True)
@@ -100,7 +101,7 @@ def start(message):
     website = types.KeyboardButton('Сайт')
     start = types.KeyboardButton('Привет')
     menu = types.KeyboardButton('Меню', )
-    help = types.KeyboardButton('Задать вопрос!')
+    help = types.KeyboardButton('Задать вопрос!') 
 
     markup.add(start, menu, website, help)
     bot.send_message(message.chat.id, 'Чем могу быть полезен?',
@@ -190,6 +191,16 @@ def get_top_headline(category, language='ru'):
 def send_latest_news(message):
     technology_headline = get_top_headline('technology')
     bot.send_message(message.chat.id, technology_headline)
+
+def get_computer_joke():
+    response = requests.get('http://api.icndb.com/jokes/random?limitTo=[nerdy]')
+    data = response.json()
+    return data['value']['joke']
+
+def send_computer_joke(message):
+    joke = get_computer_joke()
+    bot.send_message(message.chat.id, joke)
+
     
 
 def get_user_text(message):
@@ -227,8 +238,7 @@ def get_user_text(message):
         help(message)
 
     elif message.text.lower() == 'анекдот':
-        bot.send_message(
-            message.chat.id, random.choice(ask_anekdot), parse_mode='html')
+        send_computer_joke(message)
         
     elif message.text.lower() == 'погода':
         send_weather_request(message)
@@ -237,9 +247,7 @@ def get_user_text(message):
         bot.send_message(
             message.chat.id, 'Конечно, вот самая свежая новость в рубрике "Технологии"!', parse_mode='html')
         send_latest_news(message)
-                
 
-    
 
     else:
         bot.send_message(
