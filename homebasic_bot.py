@@ -69,7 +69,6 @@ now = datetime.datetime.now()
 api_key = 'fdf809985bf356bb6bd3a5c0e519e3bf'
 NEWS_API_ENDPOINT = 'https://newsapi.org/v2/top-headlines'
 NEWS_API_KEY = '22a344f591994786a0fd76f338785f11'
-API_TOKEN = ''
 
 
 @bot.message_handler(func=lambda message: True)
@@ -192,15 +191,8 @@ def send_latest_news(message):
     technology_headline = get_top_headline('technology')
     bot.send_message(message.chat.id, technology_headline)
 
-def get_computer_joke():
-    response = requests.get('http://api.icndb.com/jokes/random?limitTo=[nerdy]')
-    data = response.json()
-    return data['value']['joke']
-
-def send_computer_joke(message):
-    joke = get_computer_joke()
-    bot.send_message(message.chat.id, joke)
-
+def add_phono_video(message):
+    bot.send_message(message.chat.id, "Пожалуйста, отправьте фото или видео.")
     
 
 def get_user_text(message):
@@ -238,7 +230,8 @@ def get_user_text(message):
         help(message)
 
     elif message.text.lower() == 'анекдот':
-        send_computer_joke(message)
+        bot.send_message(
+            message.chat.id, random.choice(ask_anekdot), parse_mode='html')
         
     elif message.text.lower() == 'погода':
         send_weather_request(message)
