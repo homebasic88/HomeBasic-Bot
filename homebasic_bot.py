@@ -67,6 +67,8 @@ answer_can_you_do = ['Я умею делать вид, что у меня ест
 
 now = datetime.datetime.now()
 api_key = 'fdf809985bf356bb6bd3a5c0e519e3bf'
+NEWS_API_ENDPOINT = 'https://newsapi.org/v2/top-headlines'
+NEWS_API_KEY = '22a344f591994786a0fd76f338785f11'
 
 
 @bot.message_handler(func=lambda message: True)
@@ -166,7 +168,29 @@ def send_weather_request(message):
     markup.add(item, back)
     bot.send_message(message.chat.id, "Для определения погоды отправьте свою геопозицию!", reply_markup=markup)
 
+def get_top_headline(category, language='ru'):
+    params = {
+    'apiKey': NEWS_API_KEY,
+    'country': 'ru',
+    'category': category,
+    'pageSize': 1,
+    'language': language
+    }
 
+    response = requests.get(NEWS_API_ENDPOINT, params=params)
+    data = response.json()
+
+    if response.status_code == 200:
+        article = data['articles'][0]
+        headline = f"{article['title']}\n{article['url']}"
+        return headline
+    else:
+        return 'Извините, не удалось получить новостной заголовок.'
+    
+def send_latest_news(message):
+    technology_headline = get_top_headline('technology')
+    bot.send_message(message.chat.id, technology_headline)
+    
 
 def get_user_text(message):
 
@@ -209,6 +233,14 @@ def get_user_text(message):
     elif message.text.lower() == 'погода':
         send_weather_request(message)
 
+    elif message.text.lower() == 'новости':
+        bot.send_message(
+            message.chat.id, 'Конечно, вот самая свежая новость в рубрике "Технологии"!', parse_mode='html')
+        send_latest_news(message)
+                
+
+    
+
     else:
         bot.send_message(
             message.chat.id, random.choice(no_answers), parse_mode='html')
@@ -236,3 +268,4 @@ def handle_location(message):
 
 
 bot.polling(none_stop=True)
+print('Hello')
