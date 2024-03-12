@@ -6,12 +6,12 @@ import telebot
 from telebot import types
 
 
-bot = telebot.TeleBot('7125625436:AAHsRjl5o9kesYz0oOC1PgfuhiCxcC2LmP8')
+bot = telebot.TeleBot('7125625436:AAG3JQz3z5ZckdU2KqTRGQHqINy1uNNnw7s')
 hello_massege = ['Привет,', 'Бонжорно,', 'Приветствую тебя,',
                  'Здравствуй,', 'Рад тебя видеть,', 'Позвольте засвидетельствовать мое почтение,', 'Мое почтение,', 'Категорически приветствую,', 'Приветствую тебя земной житель,', 'Тысяча реверансов,', 'Салютую,']
-how_are_you = ['Хорошо, как твои?', 'У меня всегда все отлично, я же бот!',
-               'Спасибо что спросил! Сегодня у меня легкие нотки дипрессии, а у тебя как?', 'Дела у прокурора...',
-               "Прекрасно! Я ведь бот - у меня всегда всё на высшем уровне!", "Чудесно, как всегда! А у тебя точно все в порядке?", "У меня такие хорошие дела, что я даже завидую себе! А у тебя как?", "У меня дела неплохи, ведь я вижу тебя! Как ты?",
+how_are_you = ['Хорошо!', 'У меня всегда все отлично, я же бот!',
+               'Спасибо что спросил! Сегодня у меня легкие нотки дипрессии...',
+               "Прекрасно! Я ведь бот - у меня всегда всё на высшем уровне!", "Чудесно, как всегда!", "У меня такие хорошие дела, что я даже завидую себе!", "У меня дела неплохи, ведь я вижу тебя!",
                "Могло быть и лучше, но в целом все неплохо.", "Честно говоря, у меня дела так себе.", "Ну так, не особо плохо, но и не очень хорошо.",
                ]
 who_are_you = ['Пока что я сам не знаю ответ на это вопрос...', 'Меня создали для того что бы я помогал искать ответы на самые главные вопросы!',
@@ -69,10 +69,18 @@ answer_can_you_do = ['Я умею делать вид, что у меня ест
                      'Я умею занимать ваше время разной фигней, главное чтобы вам было весело.', 'Я могу пытаться быть смешным, но это не всегда успешно.', 
                      ]
 
+rude_words = ['хуй', 'жопа', 'пизда', 'пиздец', 'дебил', 'чмо', 'сука', 'сукин', 'блядь', 'ебать', 'гандон', 'гондон', 'дурак', ]
+neutral_answers = ['Понимаю, что ты имеешь в виду.', "Это заслуживает внимания.", "Расскажите мне больше об этом.", "Я вижу, что это может быть важным для вас.", "Я вижу, что это может быть важным для вас.", 
+                   "Благодарю, что делитесь со мной этим", "Я понимаю, почему это важно для тебя.", 
+                   ]
+tems = ['о любви', 'о смысле жизни', 'о чем-нибудь веселом', 'о сексе']
+
 now = datetime.datetime.now()
 api_key = 'fdf809985bf356bb6bd3a5c0e519e3bf'
 NEWS_API_ENDPOINT = 'https://newsapi.org/v2/top-headlines'
 NEWS_API_KEY = '22a344f591994786a0fd76f338785f11'
+
+
 
 
 @bot.message_handler(func=lambda message: True)
@@ -93,8 +101,12 @@ def echo_all(message):
     elif message.text.startswith('/menu'):
         menu(message)
 
+    elif any(word in message.text.lower() for word in rude_words):
+        bot.reply_to(message, f'{message.chat.first_name}, будьте вежливы в своих высказываниях.')
+
     else:
         get_user_text(message)
+
 
 
 
@@ -102,22 +114,21 @@ def start(message):
     
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
     website = types.KeyboardButton('Сайт')
-    start = types.KeyboardButton('Привет')
+    start = types.KeyboardButton('Начать')
     menu = types.KeyboardButton('Меню', )
-    help = types.KeyboardButton('Задать вопрос!') 
+    
 
-    markup.add(start, menu, website, help)
+    markup.add(start, menu, website)
     bot.send_message(message.chat.id, 'Чем могу быть полезен?',
                      reply_markup=markup)
     
     
 
 def help(message):
-    bot.send_message(
-        message.chat.id, 'Я рад ответить на любые твои вопросы!', parse_mode='html')
+   
     markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
-    who_are_you = types.KeyboardButton('Ты кто?')
-    how_are_you = types.KeyboardButton('Как дела?')
+    who_are_you = types.KeyboardButton('Расскажи о себе!')
+    how_are_you = types.KeyboardButton('Как твои дела?')
     what_are_you_doing = types.KeyboardButton('Что ты умеешь?')
     back = types.KeyboardButton('Назад')
 
@@ -146,7 +157,7 @@ def menu(message):
     anekdot = types.KeyboardButton('Анекдот')
     news = types.KeyboardButton('Новости')
     pogoda = types.KeyboardButton('Погода')
-    back = types.KeyboardButton('Назад')
+    back = types.KeyboardButton('В начало')
     markup.row(anekdot, news)
     markup.row(pogoda, back)
     bot.send_message(message.chat.id, 'Выберите действие:', reply_markup=markup)
@@ -198,27 +209,50 @@ def send_latest_news(message):
 
 def get_user_text(message):
 
-    if message.text.lower() == 'как дела?':
+    if message.text.lower() == 'как твои дела?':
         bot.send_message(
             message.chat.id, random.choice(how_are_you), parse_mode='html')
+        get_how_are_you(message)
 
-    elif message.text.lower() == 'привет':
+    elif message.text.lower() == 'начать':
         bot.send_message(
             message.chat.id, f'{random.choice(hello_massege)} {message.from_user.first_name}!')
-        
+        help(message)   
 
     elif message.text.lower() == 'меню':
         menu(message)
 
-    elif message.text.lower() == 'ты кто?':
+    elif message.text.lower() == 'расскажи о себе!':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        tell_me_more = types.KeyboardButton('Расскажи еще о себе!')
+        cancel = types.KeyboardButton('Отмена')
+        markup.add(tell_me_more, cancel)
         bot.send_message(
-            message.chat.id, random.choice(who_are_you), parse_mode='html')
+            message.chat.id, random.choice(who_are_you), reply_markup=markup)
+        
+    elif message.text.lower() == 'расскажи еще о себе!':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        tell_me_more = types.KeyboardButton('Расскажи еще о себе!')
+        cancel = types.KeyboardButton('Отмена')
+        markup.add(tell_me_more, cancel)
+        bot.send_message(
+            message.chat.id, random.choice(who_are_you), reply_markup=markup)
 
     elif message.text.lower() == 'что ты умеешь?':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        tell_me_more = types.KeyboardButton('Что ты умеешь еще?')
+        cancel = types.KeyboardButton('Отмена')
+        markup.add(tell_me_more, cancel)
         bot.send_message(
-            message.chat.id, random.choice(answer_can_you_do), parse_mode='html')
+            message.chat.id, random.choice(answer_can_you_do), reply_markup=markup)
+        
+    elif message.text.lower() == 'что ты умеешь еще?':
+        menu(message)
 
     elif message.text.lower() == 'назад':
+        start(message)
+
+    elif message.text.lower() == 'в начало':
         start(message)
 
     elif message.text.lower() == 'отмена':
@@ -226,9 +260,6 @@ def get_user_text(message):
 
     elif message.text.lower() == 'сайт':
         website(message)
-
-    elif message.text.lower() == 'задать вопрос!':
-        help(message)
 
     elif message.text.lower() == 'анекдот':
         bot.send_message(
@@ -242,12 +273,65 @@ def get_user_text(message):
             message.chat.id, 'Конечно, вот самая свежая новость в рубрике "Технологии"!', parse_mode='html')
         send_latest_news(message)
 
+    elif message.text.lower() == 'не хочу общаться!':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        back = types.KeyboardButton('В начало')
+        markup.add(back)
+        bot.send_message(message.chat.id, 'Понимаю тебя, напиши если захочешь пообщаться, я всегда готов поддержать тебя!',
+                     reply_markup=markup)
+    
+    elif message.text.lower() == 'хорошо!':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        anekdot = types.KeyboardButton('Анекдот')
+        news = types.KeyboardButton('Новости')
+        pogoda = types.KeyboardButton('Погода')
+        back = types.KeyboardButton('В начало')
+        markup.add(anekdot, news, pogoda, back)
+        bot.send_message(message.chat.id, "Отлично, рад это слышать! Чем я могу помочь тебе сегодня?",
+                     reply_markup=markup)
+        
+    elif message.text.lower() == 'плохо!':
+        markup = types.ReplyKeyboardMarkup(resize_keyboard=True)
+        anekdot = types.KeyboardButton('Анекдот')
+        news = types.KeyboardButton('Новости')
+        pogoda = types.KeyboardButton('Погода')
+        back = types.KeyboardButton('В начало')
+        speak = types.KeyboardButton('Поговори со мной')
+        markup.add(anekdot, news, pogoda, speak, back)
+        bot.send_message(message.chat.id, "Это печально. Надеюсь, что у тебя всё наладится. Чем я могу помочь тебе?",
+                     reply_markup=markup)
+    
+    elif message.text.lower() == 'поговори со мной':
+        markup = types.ReplyKeyboardRemove()
+        bot.send_message(
+            message.chat.id, 'Конечно, о чем ты хочешь поговорить?', reply_markup=markup)
+    elif any(word in message.text.lower() for word in tems):
+        bot.send_message(
+            message.chat.id, f'Конечно, давай погворим {message.text}!', parse_mode='html')
+        tell(message)
+        
 
     else:
         bot.send_message(
             message.chat.id, random.choice(no_answers), parse_mode='html')
         
+        
+def get_how_are_you(message):
+    markup = types.ReplyKeyboardMarkup(resize_keyboard=True, row_width=2)
+    answered_good = types.KeyboardButton('Хорошо!')
+    answered_bad = types.KeyboardButton('Плохо!')
+    back = types.KeyboardButton('Не хочу общаться!')
 
+    markup.add(answered_good, answered_bad, back)
+    bot.send_message(message.chat.id, 'А как у тебядела?',
+                     reply_markup=markup)
+           
+def tell(message):
+    bot.send_message(
+            message.chat.id, random.choice(neutral_answers), parse_mode='html')
+    bot.send_message(
+            message.chat.id, 'Говори, я слушаю тебя!', parse_mode='html')
+        
 
 @bot.message_handler(content_types=['photo'])
 def get_photo(message):
